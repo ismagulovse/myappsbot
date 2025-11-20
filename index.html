@@ -40,44 +40,7 @@
         <a href="calc.html">Калькулятор</a>
         <a href="CarsGame.html">Машинки</a>
     </div>
-    <div id="tg-status">Инициализация...</div>
-<button id="sendScore">Отправить результат боту</button>
 </body>
-<script>
-  // Получаем объект Telegram WebApp (если открыт в Telegram)
-  const tg = window.Telegram?.WebApp;
-
-  const status = document.getElementById('tg-status');
-  if (!tg) {
-    status.innerText = 'Запущено в обычном браузере — Telegram API недоступен.';
-  } else {
-    // Развернуть WebApp (если нужно)
-    try { tg.expand(); } catch(e) {}
-    status.innerText = 'Запущено внутри Telegram. Привет, ' + (tg.initDataUnsafe?.user?.first_name || 'игрок') + '!';
-    // показать главный баттон (опция)
-    try {
-      tg.MainButton.setText('Сохранить результат');
-      tg.MainButton.show();
-    } catch(e) {}
-    console.log('initDataUnsafe:', tg.initDataUnsafe);
-  }
-
-  // Пример: отправка результата (можешь вызывать после окончания уровня)
-  document.getElementById('sendScore').addEventListener('click', () => {
-    const scoreObj = { score: Math.floor(Math.random() * 1000), time: Date.now() };
-    const s = JSON.stringify(scoreObj);
-
-    if (tg && tg.sendData) {
-      // Отправит данные боту как update.web_app_data
-      tg.sendData(s);
-      alert('Данные отправлены боту.');
-      // если хочешь — закрыть webapp:
-      // tg.close();
-    } else {
-      alert('Не в Telegram: результат можно показывать локально.');
-      console.log('score:', scoreObj);
-    }
-  });
-</script>
 </html>
+
 
