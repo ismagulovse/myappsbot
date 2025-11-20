@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross the Road</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="buttons">
+        <a href="Snake.html">Змейка</a>
+        <a href="calc.html">Калькулятор</a>
+        <a href="CarsGame.html">Машинки</a>
+    </div>
+    <div id="game-container">
+        <div id="start-area"></div>
+        <div id="lane1" class="lane"></div>
+        <div id="lane2" class="lane"></div>
+        <div id="lane3" class="lane"></div>
+        <div id="lane4" class="lane" style="display: none;"></div>
+        <div id="goal-area"></div>
+        <div id="player"></div>
+        <div id="level-display">Level: 1</div>
+        <div id="game-over">
+            Game Over!<br>
+            <span id="restart" style="cursor: pointer;" onclick="resetGame()">Нажмите R для рестарта</span>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const player = document.getElementById('player');
+        const levelDisplay = document.getElementById('level-display');
+        const gameOver = document.getElementById('game-over');
+        const lane4 = document.getElementById('lane4');
+        const MIN_DISTANCE = 150;
+
+        let playerPos = { x: 380, y: 0 };
+        let level = 1;
+        let speed = 2;
+        let cars = [];
+        let lanes = 3;
+        let gameRunning = true;
+
+        const laneDirections = [1, -1, 1, -1]; 
+
+        function createCar(laneIndex) {
+            const car = document.createElement('div');
+            car.classList.add('car');
+            car.style.top = `${130 + laneIndex * 100}px`;
+            car.style.height = '40px';
+            if (laneDirections[laneIndex] === 1) {
+                car.style.backgroundImage = "url('LeftCar.png')";
+            } else {
+                car.style.backgroundImage = "url('RightCar.png')"; 
+            }
+            car.style.backgroundSize = 'contain';
+            car.style.backgroundRepeat = 'no-repeat';
+            car.style.backgroundPosition = 'center';
+
+            if (laneDirections[laneIndex] === 1) {
+                car.style.left = '-80px';
+            } else {
+                car.style.left = '800px';
+            }
+
+            gameContainer.appendChild(car);
+            cars.push({ element: car, lane: laneIndex, direction: laneDirections[laneIndex] });
+        }
+
+        function moveCars() {
+            cars = cars.filter(car => {
+                let left = parseInt(car.element.style.left) || 0;
+                left += car.direction * speed;
+
+                if (car.direction === 1 && left > 800) {
+                    car.element.remove();
+                    return false;
+                } else if (car.direction === -1 && left < -80) {
+                    car.element.remove();
+                    return false;
+                } else {
+                    car.element.style.left = `${left}px`;
+                    return true;
+                }
+            });
+        }
+
+        function checkCollision() {
+            const playerRect = player.getBoundingClientRect();
+            for (let car of cars) {
+                const carRect = car.element.getBoundingClientRect();
+                if (playerRect.left < carRect.right &&
+                    playerRect.right > carRect.left &&
+                    playerRect.top < carRect.bottom &&
+                    playerRect.bottom > carRect.top) {
+                    gameOver.style.display = 'block';
+                    gameRunning = false;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updatePlayerPosition() {
+            player.style.left = `${playerPos.x}px`;
+            player.style.bottom = `${playerPos.y}px`;
+        }
+
+        function handleKeydown(e) {
+            if (!gameRunning && e.key !== 'r' && e.key !== 'R') return;
+            if (e.key === 'r' || e.key === 'R') {
+                resetGame();
+                return;
+            }
+            const stepY = 100;
+            const stepX = 40;
+            switch (e.key) {
+                case 'ArrowUp':
+                    if (playerPos.y < 500) playerPos.y += stepY;
+                    break;
+                case 'ArrowDown':
+                    if (playerPos.y > 0) playerPos.y -= stepY;
+                    break;
+                case 'ArrowLeft':
+                    if (playerPos.x > 0) playerPos.x -= stepX;
+                    break;
+                case 'ArrowRight':
+                    if (playerPos.x < 760) playerPos.x += stepX;
+                    break;
+            }
+            updatePlayerPosition();
+            checkWin();
+        }
+
+        function checkWin() {
+            if (playerPos.y >= 500) {
+                cars.forEach(car => car.element.remove());
+                cars = [];
+                level++;
+                levelDisplay.textContent = `Level: ${level}`;
+                playerPos = { x: 380, y: 0 };
+                updatePlayerPosition();
+                increaseDifficulty();
+            }
+        }
+
+        function increaseDifficulty() {
+            speed += 0.5;
+            if (level % 2 === 0 && lanes < 4) {
+                lanes++;
+                lane4.style.display = 'block';
+            }
+        }
+
+        function spawnCars() {
+    if (!gameRunning) return;
+    for (let i = 0; i < lanes; i++) {
+        const dir = laneDirections[i];
+        let canSpawn = true;
+        
+        // Проверяем машины на этой полосе
+        for (let car of cars) {
+            if (car.lane === i) {
+                const left = parseInt(car.element.style.left) || 0;
+                if (dir === 1 && left < MIN_DISTANCE) { // Близко к левому краю 
+                    canSpawn = false;
+                    break;
+                } else if (dir === -1 && left > (800 - MIN_DISTANCE)) { // Близко к правому краю
+                    canSpawn = false;
+                    break;
+                }
+            }
+        }
+        
+        const spawnChance = 0.25 + level * 0.02;
+        if (Math.random() < spawnChance && canSpawn) {
+            createCar(i);
+        }
+    }
+    setTimeout(spawnCars, Math.max(200, 1200 / level));
+}
+
+        function gameLoop() {
+            if (!gameRunning) return;
+            moveCars();
+            checkCollision();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            cars.forEach(car => car.element.remove());
+            cars = [];
+            level = 1;
+            speed = 2;
+            lanes = 3;
+            lane4.style.display = 'none';
+            playerPos = { x: 380, y: 0 };
+            updatePlayerPosition();
+            levelDisplay.textContent = `Level: ${level}`;
+            gameOver.style.display = 'none';
+            gameRunning = true;
+            spawnCars();
+            gameLoop();
+        }
+
+        document.addEventListener('keydown', handleKeydown);
+        spawnCars();
+        gameLoop();
+    </script>
+</body>
+</html>
