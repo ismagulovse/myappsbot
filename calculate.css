@@ -71,3 +71,69 @@ a {
 a:hover {
     background-color: #666;
 }
+@media (max-width: 768px) {
+  .calculator {
+    width: 95%;
+    margin: 50px auto;
+    padding: 8px;
+  }
+  
+  .display {
+    font-size: 50px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+  }
+  
+  .button {
+    padding: 20px 15px;
+    width: 21%;
+    margin: 8px 2%;
+    font-size: 24px;
+  }
+  
+  .zero-btn {
+    padding: 20px 15px;
+    width: 46%; /* Занимает почти половину ширины */
+  }
+  
+  a {
+    padding: 12px 20px;
+    font-size: 18px;
+  }
+}
+
+/* Адаптив для очень маленьких экранов */
+@media (max-width: 480px) {
+  body {
+    font-size: 10px;
+  }
+  
+  .calculator {
+    margin: 20px auto;
+    padding: 5px;
+  }
+  
+  .display {
+    font-size: 40px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+  }
+  
+  .button {
+    padding: 15px 10px;
+    width: 20%;
+    margin: 5px 2.5%;
+    font-size: 20px;
+    border-radius: 8px;
+  }
+  
+  .zero-btn {
+    padding: 15px 10px;
+    width: 45%;
+  }
+  
+  a {
+    padding: 10px 15px;
+    font-size: 16px;
+  }
+}
