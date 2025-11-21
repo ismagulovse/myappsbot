@@ -73,7 +73,7 @@ a:hover {
 }
 @media (max-width: 768px) {
   .calculator {
-    width: 95%;
+    width: 75%;
     margin: 50px auto;
     padding: 8px;
   }
